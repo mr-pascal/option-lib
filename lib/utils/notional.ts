@@ -1,5 +1,14 @@
 import {BtoSto, Option, PutCall, UnderlyingGroupedOptions} from "../models/option";
 import {groupBy} from "./utils";
+import {Position} from "../models/position";
+
+const calculateNotionalValueForPositions = (positions: Position[]): number =>
+    calculateNotionalValueOption(positions.map(
+        p => p.options.map(o => ({...o, amount: o.amount * p.amount})
+        ).reduce((acc: Option[], curr: Option) => acc.concat(curr), [])
+        ).reduce((acc: Option[], curr: Option[]) => acc.concat(curr), [])
+    )
+;
 
 const calculateNotionalValueOption = (options: Option[]): number => {
 
@@ -44,7 +53,7 @@ const calculateNotionalValueOption = (options: Option[]): number => {
         }
 
         const effectiveShortPuts = Math.max(notionalValuesShortPuts.length - notionalValuesLongPuts.length, 0);
-        const effectiveShortCalls = Math.max(notionalValuesShortCalls.length - notionalValuesLongCalls.length ,0);
+        const effectiveShortCalls = Math.max(notionalValuesShortCalls.length - notionalValuesLongCalls.length, 0);
 
         longOptionIndexCounter = notionalValuesLongCalls.length - 1;
         for (let i = notionalValuesShortCalls.length - 1; i >= 0; i--) {
@@ -54,7 +63,7 @@ const calculateNotionalValueOption = (options: Option[]): number => {
                 longOptionIndexCounter--;
             }
         }
-        if(effectiveShortPuts >= effectiveShortCalls) {
+        if (effectiveShortPuts >= effectiveShortCalls) {
             notionalValues[underlying] = notionalValuePutSide;
         } else {
             notionalValues[underlying] = Math.max(notionalValuePutSide, notionalValueCallSide);
@@ -72,5 +81,4 @@ const getNotionalValueForOption = (option: Option) => {
 };
 
 
-
-export {calculateNotionalValueOption};
+export {calculateNotionalValueOption, calculateNotionalValueForPositions};

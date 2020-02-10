@@ -1,4 +1,4 @@
-import {calculateNotionalValueOption} from './notional';
+import {calculateNotionalValueForPositions, calculateNotionalValueOption} from './notional';
 import {Option} from "../models/option";
 import {Position} from "../models/position";
 import {ironCondor, putRatioSpread, shortPut, strangle, verticalPutSpread} from "./optionFactory";
@@ -26,4 +26,16 @@ test('get notional value of Strangle to equal $10k', () => {
 test('get notional value of Iron Condor to equal $500', () => {
     const combo: Position = ironCondor('IWM', 100, 95, 120, 125);
     expect(calculateNotionalValueOption(combo.options)).toBe(500);
+
+});
+
+test('get notional value of complex portfolio to equal $20k', () => {
+    const combos: Position[] = [
+        verticalPutSpread('IWM', 95, 100),
+        putRatioSpread('IWM', 100, 95, 1, 2),
+        strangle('IWM', 100, 150),
+        ironCondor('IWM', 100, 95, 120, 125)
+    ];
+    expect(calculateNotionalValueForPositions(combos)).toBe(20000);
+
 });
